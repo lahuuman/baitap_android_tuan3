@@ -1,6 +1,7 @@
 package com.example.baitaptuan3;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -13,6 +14,9 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class QRCodeScannerActivity extends AppCompatActivity {
 
@@ -41,7 +45,9 @@ public class QRCodeScannerActivity extends AppCompatActivity {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
             } else {
                 // get data lay duoc tu qr code
+
                 String text = result.getContents();
+                Toast.makeText(this, text, Toast.LENGTH_LONG).show();
                 handleScannedData(text);
             }
         } else {
@@ -50,25 +56,52 @@ public class QRCodeScannerActivity extends AppCompatActivity {
     }
     private void handleScannedData(String data) {
         // Xử lý dữ liệu quét được
+        System.out.println(data);
         // Nếu dữ liệu là một email, bạn có thể gửi email
         // Nếu không, bạn có thể xử lý theo cách khác
-        if (data.toLowerCase().startsWith("mailto:")) {
-            // Gọi hàm gửi email
-            sendEmail(data);
+        if (isEmailQRCode(data)) {
+            if (data.startsWith("MATMSG:")) {
+                // Xử lý MATMSG
+                String email = getFieldFromMatMsg(data, "TO");
+                String subject = getFieldFromMatMsg(data, "SUB");
+                String body = getFieldFromMatMsg(data, "BODY");
+
+                // Sử dụng thông tin email
+                sendEmail(email, subject, body);
+            }
+
         } else {
             // Xử lý dữ liệu không phải email
             Toast.makeText(this, "Dữ liệu quét được: " + data, Toast.LENGTH_LONG).show();
         }
     }
 
-    private boolean isValidEmail(String email) {
-        // Kiểm tra tính hợp lệ của email (có thể sử dụng regex hoặc cách khác)
-        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
-    }
 
-    private void sendEmail(String email) {
+    private void sendEmail(String email,String subject,String body) {
         Intent i=new Intent(this,EmailActivity.class);
         i.putExtra("nguoinhan",email);
+        i.putExtra("subject",subject);
+        i.putExtra("body",body);
         startActivity(i);
+    }
+    private String getFieldFromMatMsg(String matmsg, String field) {
+        String pattern = field + ":(.*?);";
+        Pattern regex = Pattern.compile(pattern);
+        Matcher matcher = regex.matcher(matmsg);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
+    }
+
+    public boolean isEmailQRCode(String qrCodeContent) {
+        // Kiểm tra xem QR code có phải là định dạng mailto hay không
+
+        // Kiểm tra xem QR code có phải là định dạng MATMSG hay không
+        if (qrCodeContent.startsWith("MATMSG:")) {
+            return true;
+        }
+
+        return false;
     }
 }

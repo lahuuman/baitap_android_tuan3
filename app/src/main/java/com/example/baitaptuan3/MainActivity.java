@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private Object ActivityResultLauncher;
     ActivityResultLauncher<Intent> luanch;
     String contactName,contactNumber;
-    private Button btnContacts,btn_view_contact;
+    private Button btnContacts,btn_view_contact,btn_email;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,6 +79,13 @@ public class MainActivity extends AppCompatActivity {
                 }
 
             }
+        });
+
+        // email
+        btn_email=findViewById(R.id.btn_email);
+        btn_email.setOnClickListener(V->{
+             Intent i=new Intent(this,EmailActivity.class);
+             startActivity(i);
         });
     }
     private void openContacts() {

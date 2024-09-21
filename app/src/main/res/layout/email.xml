@@ -9,7 +9,7 @@
     <!-- Trường nhập Người nhận (To) -->
 
     <!-- Trường nhập Người gửi (From) -->
-    <EditText
+    <TextView
         android:id="@+id/editTextRecipient"
         android:layout_width="match_parent"
         android:layout_height="48dp"

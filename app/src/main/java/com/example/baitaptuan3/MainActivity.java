@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private Object ActivityResultLauncher;
     ActivityResultLauncher<Intent> luanch;
     String contactName,contactNumber;
-    private Button btnContacts,btn_view_contact,btn_email;
+    private Button btnContacts,btn_view_contact,btn_email,btn_camera;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,6 +82,12 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // email
+        btn_camera=findViewById(R.id.btn_camera);
+        btn_camera.setOnClickListener(V->{
+            Intent i=new Intent(this, QRCodeScannerActivity.class);
+            startActivity(i);
+        });
+
         btn_email=findViewById(R.id.btn_email);
         btn_email.setOnClickListener(V->{
              Intent i=new Intent(this,EmailActivity.class);

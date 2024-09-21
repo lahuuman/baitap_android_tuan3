@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -16,35 +17,38 @@ import androidx.core.view.WindowInsetsCompat;
 
 public class EmailActivity extends AppCompatActivity {
 
-    private EditText editTextRecipient, editTextSubject, editTextBody,editTextSender;
-
+    private EditText  editTextSubject, editTextBody,editTextSender;
+  private String recipient;
+  private TextView editTextRecipient;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.email);
-
+         Intent data=getIntent();
+         if(data.hasExtra("nguoinhan")){
+            recipient= data.getStringExtra("nguoinhan");
+            recipient=recipient.substring(7);
+         }else{
+             recipient="lahuuminh678@gmail.com";
+         }
         // Tham chiếu đến các trường nhập liệu
-        editTextRecipient = findViewById(R.id.editTextRecipient);
+
         editTextSubject = findViewById(R.id.editTextSubject);
         editTextBody = findViewById(R.id.editTextBody);
-        editTextSender=findViewById(R.id.editTextSender);
+        editTextRecipient=findViewById(R.id.editTextRecipient);
+        String temp="Recipient: "+recipient;
+        editTextRecipient.setText(temp);
         Button buttonSend = findViewById(R.id.buttonSend);
 
         // Xử lý sự kiện khi người dùng nhấn vào nút Gửi Email
         buttonSend.setOnClickListener(
          v->{
                 // Lấy dữ liệu từ các trường nhập
-                String recipient = editTextRecipient.getText().toString();
                 String subject = editTextSubject.getText().toString();
                 String body = editTextBody.getText().toString();
                 // Kiểm tra xem người nhận có được nhập không
+                openEmailApp(recipient,subject,body);
 
-                if (recipient.isEmpty()) {
-                    Toast.makeText(this, "Vui lòng nhập địa chỉ người nhận.", Toast.LENGTH_SHORT).show();
-                } else {
-                    // Gọi hàm để mở ứng dụng email với dữ liệu đã điền
-                    openEmailApp(recipient, subject, body);
-                }
 
         });
     }

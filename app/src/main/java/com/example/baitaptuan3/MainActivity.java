@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -18,6 +19,7 @@ import android.provider.ContactsContract;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_WRITE_CONTACTS = 1;
@@ -73,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
                             new String[]{android.Manifest.permission.WRITE_CONTACTS}, REQUEST_CODE_WRITE_CONTACTS);
                 } else {
                     // Nếu quyền đã được cấp, thực hiện việc thêm danh bạ
-                    addContactToPhone(contactName, contactNumber);
+                    showContactDetails(contactName, contactNumber);
                 }
 
             }
@@ -115,27 +117,45 @@ public class MainActivity extends AppCompatActivity {
 //        AlertDialog dialog = builder.create();
 //        dialog.show();
 //    }
-private void addContactToPhone(String contactName, String contactNumber) {
-        System.out.println("Vao contact" + contactName);
-    ContentValues values = new ContentValues();
+private void showContactDetails(String contactName, String contactNumber) {
+    Uri contactUri = null;
 
-    // Thêm liên hệ vào RawContacts
-    Uri rawContactUri = getContentResolver().insert(ContactsContract.RawContacts.CONTENT_URI, values);
-    long rawContactId = ContentUris.parseId(rawContactUri);
+    // Truy vấn danh bạ để tìm liên hệ dựa trên tên và số điện thoại
+    ContentResolver resolver = getContentResolver();
+    Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
+    String[] projection = new String[]{
+            ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
+            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+            ContactsContract.CommonDataKinds.Phone.NUMBER
+    };
 
-    // Thêm tên
-    values.clear();
-    values.put(ContactsContract.Data.RAW_CONTACT_ID, rawContactId);
-    values.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE);
-    values.put(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, contactName);
-    getContentResolver().insert(ContactsContract.Data.CONTENT_URI, values);
+    String selection = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " = ? AND " +
+            ContactsContract.CommonDataKinds.Phone.NUMBER + " = ?";
+    String[] selectionArgs = new String[]{contactName, contactNumber};
 
-    // Thêm số điện thoại
-    values.clear();
-    values.put(ContactsContract.Data.RAW_CONTACT_ID, rawContactId);
-    values.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE);
-    values.put(ContactsContract.CommonDataKinds.Phone.NUMBER, contactNumber);
-    values.put(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE);
-    getContentResolver().insert(ContactsContract.Data.CONTENT_URI, values);
+    Cursor cursor = resolver.query(uri, projection, selection, selectionArgs, null);
+
+    if (cursor != null && cursor.moveToFirst()) {
+        // Kiểm tra nếu cột CONTACT_ID tồn tại
+        int contactIdIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID);
+        if (contactIdIndex != -1) {
+            // Lấy ID liên hệ từ kết quả truy vấn
+            long contactId = cursor.getLong(contactIdIndex);
+
+            // Tạo URI để mở chi tiết liên hệ
+            contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId);
+        }
+        cursor.close();
+    }
+
+    if (contactUri != null) {
+        // Tạo intent để mở ứng dụng danh bạ với thông tin liên hệ
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(contactUri);
+        startActivity(intent);
+    } else {
+        // Nếu không tìm thấy liên hệ, hiển thị thông báo
+        Toast.makeText(this, "Không tìm thấy liên hệ với tên: " + contactName + " và số: " + contactNumber, Toast.LENGTH_SHORT).show();
+    }
 }
 }

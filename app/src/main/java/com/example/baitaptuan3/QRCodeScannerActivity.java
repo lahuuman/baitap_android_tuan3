@@ -40,12 +40,30 @@ public class QRCodeScannerActivity extends AppCompatActivity {
             if (result.getContents() == null) {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
             } else {
-                String email = result.getContents();
-                sendEmail(email);
+                // get data lay duoc tu qr code
+                String text = result.getContents();
+                handleScannedData(text);
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+    private void handleScannedData(String data) {
+        // Xử lý dữ liệu quét được
+        // Nếu dữ liệu là một email, bạn có thể gửi email
+        // Nếu không, bạn có thể xử lý theo cách khác
+        if (data.toLowerCase().startsWith("mailto:")) {
+            // Gọi hàm gửi email
+            sendEmail(data);
+        } else {
+            // Xử lý dữ liệu không phải email
+            Toast.makeText(this, "Dữ liệu quét được: " + data, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private boolean isValidEmail(String email) {
+        // Kiểm tra tính hợp lệ của email (có thể sử dụng regex hoặc cách khác)
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 
     private void sendEmail(String email) {

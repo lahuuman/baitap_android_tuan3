@@ -25,7 +25,6 @@ public class EmailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.email);
-
         Intent data = getIntent();
         if (data.hasExtra("nguoinhan")) {
             recipient = data.getStringExtra("nguoinhan");

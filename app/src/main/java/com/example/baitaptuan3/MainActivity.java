@@ -25,16 +25,20 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_WRITE_CONTACTS = 1;
     private Object ActivityResultLauncher;
     ActivityResultLauncher<Intent> luanch;
-    String contactName,contactNumber;
-    private Button btnContacts,btn_view_contact,btn_email,btn_camera;
+    String contactName, contactNumber;
+    private Button btnContacts, btn_view_contact, btn_email, btn_camera;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Init Views
         btnContacts = findViewById(R.id.bt_contact);
-        btn_view_contact=findViewById(R.id.btn_view_contact);
+        btn_view_contact = findViewById(R.id.btn_view_contact);
         btn_view_contact.setEnabled(false);
-        luanch=registerForActivityResult(
+
+        luanch = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK) {
@@ -48,13 +52,9 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                 });
+
         btnContacts.setOnClickListener(v -> {
             // Kiểm tra quyền truy cập danh bạ
-//            if (ContextCompat.checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
-//                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CONTACTS}, REQUEST_CONTACTS_PERMISSION);
-//            } else {
-//                openContacts(); // Nếu có quyền, mở danh bạ
-//            }
             if (ContextCompat.checkSelfPermission(v.getContext(), android.Manifest.permission.READ_CONTACTS)
                     != PackageManager.PERMISSION_GRANTED) {
                 // Nếu chưa được cấp, yêu cầu quyền
@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
                 openContacts();
             }
         });
+
         btn_view_contact.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -81,19 +82,21 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // email
-        btn_camera=findViewById(R.id.btn_camera);
-        btn_camera.setOnClickListener(V->{
-            Intent i=new Intent(this, QRCodeScannerActivity.class);
+        // camera
+        btn_camera = findViewById(R.id.btn_camera);
+        btn_camera.setOnClickListener(V -> {
+            Intent i = new Intent(this, QRCodeScannerActivity.class);
             startActivity(i);
         });
 
-        btn_email=findViewById(R.id.btn_email);
-        btn_email.setOnClickListener(V->{
-             Intent i=new Intent(this,EmailActivity.class);
-             startActivity(i);
+        // email
+        btn_email = findViewById(R.id.btn_email);
+        btn_email.setOnClickListener(V -> {
+            Intent i = new Intent(this, EmailActivity.class);
+            startActivity(i);
         });
     }
+
     private void openContacts() {
         // Tạo Intent để mở danh bạ
 //        Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
@@ -101,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
         intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
         luanch.launch(intent); // Khởi chạy danh bạ
     }
+
     private void retrieveContactInfo(Uri contactUri) {
         String[] projection = {
                 ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
@@ -119,56 +123,46 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-//    private void showAlertDialog() {
-//        // Tạo builder cho AlertDialog
-//        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-//
-//        // Thiết lập tiêu đề và thông điệp cho hộp thoại
-//        builder.setTitle("Thông báo");
-//        builder.setMessage("Name: " + contactName + "\nPhone: " + contactNumber);
-////        System.out.println("vo dialog"+ contactName + contactNumber);
-//        AlertDialog dialog = builder.create();
-//        dialog.show();
-//    }
-private void showContactDetails(String contactName, String contactNumber) {
-    Uri contactUri = null;
 
-    // Truy vấn danh bạ để tìm liên hệ dựa trên tên và số điện thoại
-    ContentResolver resolver = getContentResolver();
-    Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
-    String[] projection = new String[]{
-            ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
-            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
-            ContactsContract.CommonDataKinds.Phone.NUMBER
-    };
+    private void showContactDetails(String contactName, String contactNumber) {
+        Uri contactUri = null;
 
-    String selection = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " = ? AND " +
-            ContactsContract.CommonDataKinds.Phone.NUMBER + " = ?";
-    String[] selectionArgs = new String[]{contactName, contactNumber};
+        // Truy vấn danh bạ để tìm liên hệ dựa trên tên và số điện thoại
+        ContentResolver resolver = getContentResolver();
+        Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
+        String[] projection = new String[]{
+                ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
+                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                ContactsContract.CommonDataKinds.Phone.NUMBER
+        };
 
-    Cursor cursor = resolver.query(uri, projection, selection, selectionArgs, null);
+        String selection = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " = ? AND " +
+                ContactsContract.CommonDataKinds.Phone.NUMBER + " = ?";
+        String[] selectionArgs = new String[]{contactName, contactNumber};
 
-    if (cursor != null && cursor.moveToFirst()) {
-        // Kiểm tra nếu cột CONTACT_ID tồn tại
-        int contactIdIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID);
-        if (contactIdIndex != -1) {
-            // Lấy ID liên hệ từ kết quả truy vấn
-            long contactId = cursor.getLong(contactIdIndex);
+        Cursor cursor = resolver.query(uri, projection, selection, selectionArgs, null);
 
-            // Tạo URI để mở chi tiết liên hệ
-            contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId);
+        if (cursor != null && cursor.moveToFirst()) {
+            // Kiểm tra nếu cột CONTACT_ID tồn tại
+            int contactIdIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID);
+            if (contactIdIndex != -1) {
+                // Lấy ID liên hệ từ kết quả truy vấn
+                long contactId = cursor.getLong(contactIdIndex);
+
+                // Tạo URI để mở chi tiết liên hệ
+                contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId);
+            }
+            cursor.close();
         }
-        cursor.close();
-    }
 
-    if (contactUri != null) {
-        // Tạo intent để mở ứng dụng danh bạ với thông tin liên hệ
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(contactUri);
-        startActivity(intent);
-    } else {
-        // Nếu không tìm thấy liên hệ, hiển thị thông báo
-        Toast.makeText(this, "Không tìm thấy liên hệ với tên: " + contactName + " và số: " + contactNumber, Toast.LENGTH_SHORT).show();
+        if (contactUri != null) {
+            // Tạo intent để mở ứng dụng danh bạ với thông tin liên hệ
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(contactUri);
+            startActivity(intent);
+        } else {
+            // Nếu không tìm thấy liên hệ, hiển thị thông báo
+            Toast.makeText(this, "Không tìm thấy liên hệ với tên: " + contactName + " và số: " + contactNumber, Toast.LENGTH_SHORT).show();
+        }
     }
-}
 }

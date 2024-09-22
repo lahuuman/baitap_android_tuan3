@@ -64,6 +64,13 @@ public class QRCodeScannerActivity extends AppCompatActivity {
 
                 // Sử dụng thông tin email
                 sendEmail(email, subject, body);
+            } else if (data.trim().startsWith("MAILTO:")) {
+
+                String temp[]=data.split(":");
+                String email;
+                email = temp[1];
+
+                sendEmail(email,"","");
             }
         } else if (isSMSQrCode(data)) {
             sendSMS(data);
@@ -117,6 +124,9 @@ public class QRCodeScannerActivity extends AppCompatActivity {
         if (qrCodeContent.startsWith("MATMSG:")) {
             return true;
         }
+        if(qrCodeContent.startsWith("MAILTO:")){
+            return true;
+        }
 
         return false;
     }
@@ -125,6 +135,7 @@ public class QRCodeScannerActivity extends AppCompatActivity {
         if (data.startsWith("SMSTO:")) {
             return true;
         }
+
         return false;
     }
 }

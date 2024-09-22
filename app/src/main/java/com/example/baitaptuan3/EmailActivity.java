@@ -18,25 +18,30 @@ import androidx.core.view.WindowInsetsCompat;
 public class EmailActivity extends AppCompatActivity {
 
     private EditText editTextSubject, editTextBody, editTextSender;
-    private String recipient;
+    private String recipient,subject,body;
     private TextView editTextRecipient;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.email);
         Intent data = getIntent();
-        if (data.hasExtra("nguoinhan")) {
-            recipient = data.getStringExtra("nguoinhan");
-            recipient = recipient.substring(7);
-        } else {
-            recipient = "lahuuminh678@gmail.com";
-        }
+
         // Tham chiếu đến các trường nhập liệu
 
         editTextSubject = findViewById(R.id.editTextSubject);
         editTextBody = findViewById(R.id.editTextBody);
         editTextRecipient = findViewById(R.id.editTextRecipient);
+        if (data.hasExtra("nguoinhan")) {
+            recipient = data.getStringExtra("nguoinhan");
+            subject=data.getStringExtra("subject");
+            body=data.getStringExtra("body");
+            editTextBody.setText(body);
+            editTextSubject.setText(subject);
+        } else {
+            recipient = "lahuuminh678@gmail.com";
+        }
         String temp = "Recipient: " + recipient;
         editTextRecipient.setText(temp);
         Button buttonSend = findViewById(R.id.buttonSend);

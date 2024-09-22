@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Trường nhập Người nhận (To) -->
+
+    <!-- Trường nhập Người gửi (From) -->
+    <TextView
+        android:id="@+id/editTextRecipient"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+
+        android:hint="Người nhận (To)" />
+
+
+    <EditText
+        android:id="@+id/editTextSender"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Người gửi (From)"
+        android:visibility="gone" /> <!-- Bạn có thể ẩn đi vì ứng dụng email sẽ tự động lấy người gửi từ tài khoản người dùng -->
+
+    <!-- Trường nhập Chủ đề (Subject) -->
+    <EditText
+        android:id="@+id/editTextSubject"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="Chủ đề" />
+
+    <!-- Trường nhập Nội dung (Body) -->
+
+    <!-- Nút Gửi -->
+    <EditText
+        android:id="@+id/editTextBody"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Nội dung"
+        android:lines="5" />
+
+    <Button
+        android:id="@+id/buttonSend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Gửi Email" />
+
+</LinearLayout>

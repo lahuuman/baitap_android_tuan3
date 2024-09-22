@@ -21,5 +21,17 @@
         android:layout_height="wrap_content"
         android:text="VIEWCONTACT" />
 
+    <Button
+        android:id="@+id/btn_email"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Call Email" />
+
+    <Button
+        android:id="@+id/btn_camera"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Call Camera" />
+
 
 </LinearLayout>

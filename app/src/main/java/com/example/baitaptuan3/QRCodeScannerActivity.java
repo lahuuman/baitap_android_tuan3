@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Patterns;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,6 +12,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,11 +47,13 @@ public class QRCodeScannerActivity extends AppCompatActivity {
         if (result != null) {
             if (result.getContents() == null) {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
+                finish();
             } else {
                 // get data lay duoc tu qr code
                 String text = result.getContents();
                 Toast.makeText(this, text, Toast.LENGTH_LONG).show();
                 handleScannedData(text);
+                finish();
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
@@ -74,9 +84,10 @@ public class QRCodeScannerActivity extends AppCompatActivity {
             }
         } else if (isSMSQrCode(data)) {
             sendSMS(data);
+        } else if (isUrlQrCode(data)) {
+            fetchFinalUrl(data);
         } else {
-            // Xử lý dữ liệu không phải email
-            Toast.makeText(this, "Dữ liệu quét được: " + data, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Dữ liệu không hợp lệ!", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -137,5 +148,74 @@ public class QRCodeScannerActivity extends AppCompatActivity {
         }
 
         return false;
+    }
+
+
+    // url
+    private boolean isUrlQrCode(String data){
+        if (Patterns.WEB_URL.matcher(data).matches()){
+            return true;
+        }
+        return false;
+    }
+    private void openUrl(String data) {
+        Intent intent = new Intent(this, UrlActivity.class);
+
+        if (data != null && isUrlQrCode(data)) {
+            intent.putExtra("url", data);
+        } else {
+            String err = "URL không hợp lệ hoặc không tồn tại";
+            intent.putExtra("error", err);
+        }
+        startActivity(intent);
+    }
+    // img
+    private boolean isImageUrl(String url) {
+        String s = ".*\\.(jpg|jpeg|png|gif|bmp|webp)$";
+        return url.matches(s);
+    }
+
+    private void openImageUrl(String imageUrl) {
+        Intent intent = new Intent(this, ImageViewActivity.class);
+        intent.putExtra("image_url", imageUrl);
+        startActivity(intent);
+    }
+
+    private void fetchFinalUrl(String shortUrl) {
+        new Thread(() -> {
+            try {
+                URL url = new URL(shortUrl);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setInstanceFollowRedirects(true);
+                connection.setRequestMethod("GET");
+                connection.connect();
+
+                int responseCode = connection.getResponseCode(); // Lấy mã trạng thái
+                String finalUrl = connection.getURL().toString(); // Lấy URL cuối cùng
+                String contentType = connection.getContentType(); // Lấy loại nội dung
+
+                // In ra mã trạng thái và URL cuối cùng vào log
+                Log.d("Response Code", "Mã trạng thái: " + responseCode);
+                Log.d("Final URL", "URL cuối cùng: " + finalUrl);
+
+                if (contentType != null && contentType.startsWith("image/")) {
+                    openImageUrl(finalUrl);
+                } else {
+                    openUrl(finalUrl);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                runOnUiThread(() -> Toast.makeText(this, "Lỗi khi truy cập URL!", Toast.LENGTH_SHORT).show());
+            }
+        }).start();
+    }
+
+
+
+
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
     }
 }

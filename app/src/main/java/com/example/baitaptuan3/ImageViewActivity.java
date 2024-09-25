@@ -20,7 +20,6 @@ public class ImageViewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_image_view);
         TextView textViewUrl = findViewById(R.id.textViewUrl);
         Button buttonViewImage = findViewById(R.id.buttonVisit);
-        Button buttonDownload = findViewById(R.id.btnInstallImage);
 
         // Nhận URL từ Intent
         imageUrl = getIntent().getStringExtra("image_url");
@@ -31,7 +30,5 @@ public class ImageViewActivity extends AppCompatActivity {
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(imageUrl));
             startActivity(browserIntent);
         });
-
-//        buttonDownload.setOnClickListener(v -> downloadImage(imageUrl));
     }
 }
